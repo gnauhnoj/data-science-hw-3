@@ -19,7 +19,7 @@ def split_train_test_pointwise(data, len_items):
         if s < split_index:
             test.append(train[s])
             train[s] = item
-    return (iter(train), iter(test))
+    return [iter(train), iter(test)]
 
 
 def split_train_test_axiswise(data, len_users, len_items):
@@ -32,17 +32,18 @@ def split_train_test_axiswise(data, len_users, len_items):
             test.append(item)
         else:
             train.append(item)
-    return (iter(train), iter(test), iter(remove_users), iter(remove_items))
+    return [iter(train), iter(test), iter(remove_users), iter(remove_items)]
 
 
-def get_train_data(sample_method='axis'):
+def get_train_data(axis_sample=True):
     (users, items, reviews) = getInfo()
     data_generator = getRatings()
-    if sample_method == 'axis':
-        train = split_train_test_axiswise(data_generator, users, items)[0]
+    if axis_sample:
+        out = split_train_test_axiswise(data_generator, users, items)
     else:
-        train = split_train_test_pointwise(data_generator, reviews)[0]
-    return loadAsNP(train, users, items)
+        out = split_train_test_pointwise(data_generator, reviews)
+    out[0] = loadAsNP(out[0], users, items)
+    return out
 
 
 if __name__ == '__main__':
