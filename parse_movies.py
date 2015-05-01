@@ -60,14 +60,17 @@ def buildMovieDictionary(movie_generator):
     return movies
 
 
-def buildRatingDictionary(movie_generator, data_generator):
-    # movies = buildMovieDictionary(movie_generator)
+def buildRatingDictionary(data_generator, movie_generator=None):
+    if movie_generator is not None:
+        movies = buildMovieDictionary(movie_generator)
     ratings = {}
     for review in data_generator:
         (user_id, movie_id, rating) = review
         ratings.setdefault(user_id, {})
-        # ratings[user_id][(movie_id, movies[movie_id])] = rating
-        ratings[user_id][movie_id] = rating
+        if movie_generator is not None:
+            ratings[user_id][(movie_id, movies[movie_id])] = rating
+        else:
+            ratings[user_id][movie_id] = rating
     return ratings
 
 
@@ -104,4 +107,5 @@ if __name__ == '__main__':
     data_generator = getRatings()
     (users, items, reviews) = getInfo()
     # ratings = buildRatingDictionary(movie_generator, data_generator)
+    movies = buildMovieDictionary(movie_generator)
     np_arr = loadAsNP(data_generator, users, items)
