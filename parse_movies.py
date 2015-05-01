@@ -1,8 +1,8 @@
 import sys
 import os
 import numpy as np
+import random
 # import math
-# import random
 # import time
 # import json
 
@@ -10,6 +10,7 @@ DATA_PATH = os.path.join(os.getcwd(), 'data')
 ITEM_FILENAME = os.path.join(DATA_PATH, 'ml-100k/u.item')
 DATA_FILENAME = os.path.join(DATA_PATH, 'ml-100k/u.data')
 INFO_FILENAME = os.path.join(DATA_PATH, 'ml-100k/u.info')
+TRAIN_TEST_SPLIT = 0.8
 
 
 # load as dictionary-generator
@@ -86,7 +87,8 @@ def loadAsNP(data_generator, users, items):
             if matrix[user_id][movie_id]:
                 ratingNum += 1
                 ratingSum += matrix[user_id][movie_id]
-        matrix[0][movie_id] = ratingSum/ratingNum
+        if ratingNum > 0:
+            matrix[0][movie_id] = ratingSum/ratingNum
     for user_id in xrange(1, matrix.shape[0]):
         ratingNum = 0
         ratingSum = 0.0
@@ -94,7 +96,8 @@ def loadAsNP(data_generator, users, items):
             if matrix[user_id][movie_id]:
                 ratingNum += 1
                 ratingSum += matrix[user_id][movie_id]
-        matrix[user_id][0] = ratingSum/ratingNum
+        if ratingNum > 0:
+            matrix[user_id][0] = ratingSum/ratingNum
     return matrix
 
 
@@ -102,10 +105,32 @@ def get_rating(matrix, user_id, item_id):
     return matrix[user_id][item_id]
 
 
+def split_train_test(data, len_items):
+    split_index = int(len_items * TRAIN_TEST_SPLIT)
+    iterator = iter(data)
+    train = [next(iterator) for _ in range(split_index)]
+    test = []
+    n = split_index
+    for item in iterator:
+        n += 1
+        s = random.randint(0, n)
+        if s < split_index:
+            test.append(train[s])
+            train[s] = item
+    return (iter(train), iter(test))
+
+
+def get_train_data():
+    (users, items, reviews) = getInfo()
+    data_generator = getRatings()
+    train = split_train_test(data_generator, reviews)[0]
+    return loadAsNP(train, users, items)
+
 if __name__ == '__main__':
     movie_generator = getMovies()
     data_generator = getRatings()
     (users, items, reviews) = getInfo()
     # ratings = buildRatingDictionary(movie_generator, data_generator)
     movies = buildMovieDictionary(movie_generator)
-    np_arr = loadAsNP(data_generator, users, items)
+    train, test = split_train_test(data_generator, reviews)
+    np_arr = loadAsNP(train, users, items)
