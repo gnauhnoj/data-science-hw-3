@@ -35,10 +35,13 @@ def split_train_test_axiswise(data, len_users, len_items):
     return (iter(train), iter(test), iter(remove_users), iter(remove_items))
 
 
-def get_train_data():
+def get_train_data(sample_method='axis'):
     (users, items, reviews) = getInfo()
     data_generator = getRatings()
-    train = split_train_test(data_generator, reviews)[0]
+    if sample_method == 'axis':
+        train = split_train_test_axiswise(data_generator, users, items)[0]
+    else:
+        train = split_train_test_pointwise(data_generator, reviews)[0]
     return loadAsNP(train, users, items)
 
 
