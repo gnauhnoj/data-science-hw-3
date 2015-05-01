@@ -84,4 +84,4 @@ class collaborative_filtering:
     	return sorted_prediction
 
     def score(self, test):
-    	
+    	return
