@@ -59,7 +59,7 @@ def getMovies(item_file=None):
         (id, movie) = line[0:2]
         genres = [int(num) for num in line[5:24]]
         # genres = [genreMap[i] if genre is 1 for i, genre in enumerate(genres)]
-        genres = reduce(lambda x: )
+        # genres = reduce(lambda x: )
         genres = [genreMap[i] if genre == 1 else 'a' for i, genre in enumerate(genres)]
         id = int(id)
         yield (id, movie, genres)
