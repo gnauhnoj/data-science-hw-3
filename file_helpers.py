@@ -2,10 +2,24 @@ import os
 import sys
 
 DATA_PATH = os.path.join(os.getcwd(), 'data')
-ITEM_FILENAME = os.path.join(DATA_PATH, 'ml-100k/u.item')
-DATA_FILENAME = os.path.join(DATA_PATH, 'ml-100k/u.data')
-INFO_FILENAME = os.path.join(DATA_PATH, 'ml-100k/u.info')
+ITEM_FILENAME_100k = os.path.join(DATA_PATH, 'ml-100k/u.item')
+DATA_FILENAME_100k = os.path.join(DATA_PATH, 'ml-100k/u.data')
+INFO_FILENAME_100k = os.path.join(DATA_PATH, 'ml-100k/u.info')
+delim1_100k = '\t'
+delim2_100k = '|'
 
+ITEM_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/movies.dat')
+DATA_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/ratings.dat')
+INFO_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/info.dat')
+delim_1M = '::'
+
+ITEM_FILENAME   = ITEM_FILENAME_100k
+DATA_FILENAME   = DATA_FILENAME_100k
+INFO_FILENAME   = INFO_FILENAME_100k
+delim1          = delim1_100k
+delim2          = delim2_100k
+
+genreMap = ['unknown', 'Action', 'Adventure', 'Animation', 'Childrens', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
 
 # load as dictionary-generator
 def getRatings(data_file=None):
@@ -41,7 +55,12 @@ def getMovies(item_file=None):
     except:
         f = open(ITEM_FILENAME, 'r')
     for l in f:
-        (id, movie) = l.strip().split('|')[0:2]
+        line = l.strip().split(delim2)
+        (id, movie) = line[0:2]
+        genres = [int(num) for num in line[5:24]]
+        # genres = [genreMap[i] if genre is 1 for i, genre in enumerate(genres)]
+        genres = reduce(lambda x: )
+        genres = [genreMap[i] if genre == 1 else 'a' for i, genre in enumerate(genres)]
         id = int(id)
-        yield (id, movie)
+        yield (id, movie, genres)
     f.close()
