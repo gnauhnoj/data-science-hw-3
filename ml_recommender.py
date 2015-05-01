@@ -7,5 +7,6 @@ if __name__ == '__main__':
 	# print len(train_data[0])
 	cf = collaborative_filtering(train_data)
 	cf.precompute_item_similarity()
+	predict cf.predict(1,3)
 	# cf.train()
 	# get test data
