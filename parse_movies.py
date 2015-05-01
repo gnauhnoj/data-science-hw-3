@@ -13,7 +13,7 @@ INFO_FILENAME = os.path.join(DATA_PATH, 'ml-100k/u.info')
 
 
 # load as dictionary-generator
-def getData(data_file=None):
+def getRatings(data_file=None):
     try:
         f = open(data_file, 'r')
     except:
@@ -95,13 +95,13 @@ def loadAsNP(data_generator, users, items):
     return matrix
 
 
-def get_rating(matri, user_id, item_id):
+def get_rating(matrix, user_id, item_id):
     return matrix[user_id][item_id]
 
 
 if __name__ == '__main__':
     movie_generator = getMovies()
-    data_generator = getData()
+    data_generator = getRatings()
     (users, items, reviews) = getInfo()
     # ratings = buildRatingDictionary(movie_generator, data_generator)
     np_arr = loadAsNP(data_generator, users, items)
