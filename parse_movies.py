@@ -117,14 +117,32 @@ def split_train_test(data, len_items):
         if s < split_index:
             test.append(train[s])
             train[s] = item
-    return (iter(train), iter(test))
+    return [iter(train), iter(test)]
 
 
-def get_train_data():
+def split_train_test_axiswise(data, len_users, len_items):
+    remove_users = reservoir_sample(xrange(len_users), int(len_users * USER_CUT))
+    remove_items = reservoir_sample(xrange(len_items), int(len_items * ITEM_CUT))
+    train = []
+    test = []
+    for item in iter(data):
+        if item[0] in remove_users and item[1] in remove_items:
+            test.append(item)
+        else:
+            train.append(item)
+    return [iter(train), iter(test), iter(remove_users), iter(remove_items)]
+
+
+def get_train_data(axis_sample=True):
     (users, items, reviews) = getInfo()
     data_generator = getRatings()
-    train = split_train_test(data_generator, reviews)[0]
-    return loadAsNP(train, users, items)
+    if axis_sample:
+        out = split_train_test_axiswise(data_generator, users, items)
+    else:
+        out = split_train_test_pointwise(data_generator, reviews)
+    out[0] = loadAsNP(out[0], users, items)
+    return out
+    
 
 if __name__ == '__main__':
     movie_generator = getMovies()
