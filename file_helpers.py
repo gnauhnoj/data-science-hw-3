@@ -26,14 +26,15 @@ genreMap = ['unknown', 'Action', 'Adventure', 'Animation', 'Childrens', 'Comedy'
 def getRatings(data_file=None):
     try:
         f = open(data_file, 'r')
-    except:
+    except TypeError:
         f = open(DATA_FILENAME, 'r')
     for l in f:
         (user_id, movie_id, rating, ts) = l.strip().split(delim1)
         user_id = int(user_id)
         movie_id = int(movie_id)
         rating = float(rating)
-        yield (user_id, movie_id, rating)
+        ts = int(ts)
+        yield (user_id, movie_id, rating, ts)
     f.close()
 
 
@@ -41,7 +42,7 @@ def getInfo(info_file=None):
     stats = []
     try:
         f = open(info_file, 'r')
-    except:
+    except TypeError:
         f = open(INFO_FILENAME, 'r')
     for l in f:
         stat = int(l.strip().split()[0])
@@ -53,7 +54,7 @@ def getInfo(info_file=None):
 def getMovies(item_file=None):
     try:
         f = open(item_file, 'r')
-    except:
+    except TypeError:
         f = open(ITEM_FILENAME, 'r')
     for l in f:
         line = l.strip().split(delim2)
