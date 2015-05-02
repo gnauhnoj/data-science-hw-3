@@ -7,7 +7,10 @@ if __name__ == '__main__':
 	print "loaded data"
 	# print len(train_data[0])
 	cf = collaborative_filtering(train_data)
-	cf.precompute_item_similarity()
+	# cf.precompute_item_similarity()
 	print cf.predict(1,3)
+	print "Evaluating"
+	print cf.score(test_data)
+	# print cf.predict(1,3)
 	# cf.train()
 	# get test data
