@@ -21,6 +21,7 @@ class collaborative_filtering:
         self.data = data
         self.n_movies = len(data[0])
         self.item_similarity = np.zeros((self.n_movies, self.n_movies), dtype=float)
+        self.similarity_calculated = np.zeros(self.n_movies, dtype=float)
         return
 
 
@@ -63,22 +64,13 @@ class collaborative_filtering:
         Method to compute similarity between 2 items
         Assuming pearson for now
         """
-        # print "get pearson"
         new_1 = []
         new_2 = []
         for i in range(1,len(item_1)):
             if (item_1[i] != 0) or (item_2[i] != 0):
                 new_1.append(item_1[i])
                 new_2.append(item_2[i])
-        # zero_indices_1 = np.where(item_1 == 0.0)[0]
-        # zero_indices_2 = np.where(item_2 == 0.0)[0]
-        # all_zero_indices = np.concatenate([zero_indices_1,zero_indices_1])
-        # if len(all_zero_indices) == len(item_1):
-        #     return 0.0
-        # remove_indices = np.unique(all_zero_indices)
-        # new_1 = np.delete(item_1,remove_indices)
-        # new_2 = np.delete(item_2,remove_indices)
-        if (len(new_1) == 0) or (len(new_2) == 0) or (sum(new_1) == 0.0) or (sum(new_2) == 0.0):
+        if (len(new_1) == 0) or (len(new_2) == 0):
             return 0.0
         similarity_value = pearsonr(new_1,new_2)[0]
         return similarity_value
@@ -98,20 +90,24 @@ class collaborative_filtering:
         all_items = range(1,self.n_movies)
         movie_1 = self.data[:,item_1]
         # print movie_1
-        similarities = np.zeros(self.n_movies, dtype=float)
-        for item_2 in all_items:
-            movie_2 = self.data[:,item_2]
-            if( (item_1 == item_2) or  movie_1[0] == 0.0 or  movie_2[0] == 0.0 ):
-                similarities[item_2] = 0
-            else:
-                try:
-                    similarities[item_2] = self.similarity(movie_1,movie_2)
-                    # print similarities[item_2]
-                    # break
-                except Exception as e:
-                    print e
-                    print item_1, item_2
+        if self.similarity_calculated[item_1] == 0:
+            similarities = np.zeros(self.n_movies, dtype=float)
+            for item_2 in all_items:
+                movie_2 = self.data[:,item_2]
+                if( (item_1 != item_2) or  (movie_1[0] != 0.0) or  (movie_2[0] != 0.0) ):
+                    try:
+                        similarities[item_2] = self.similarity(movie_1,movie_2)
+                        self.item_similarity[item_1][item_2] = similarities[item_2]
+                        # print similarities[item_2]
+                        # break
+                    except Exception as e:
+                        print e
+                        print item_1, item_2
+        else:
+            print "repeated"
+            similarities = self.item_similarity[item_1]
         # print similarities
+        self.similarity_calculated[item_1] = 1
         return np.argsort(similarities),similarities
 
 
@@ -121,7 +117,6 @@ class collaborative_filtering:
         predict the rating for the user
         Assuming item-item 
         """
-        # print "predict"
         # get similarity value of all other movies(items) for the given movie
         # TODO: change it to top k if needed
         similar_movies, movies_similarity = self.get_similar_movies(movie_id)
@@ -131,9 +126,6 @@ class collaborative_filtering:
 
         prediction = 0.0
         total_sum = 0.0
-        # for s in movies_similarity:
-        #     if s>0:
-        #         total_sum += s 
 
         # do a weighted sum of users existing reviews
         # weights are based on the similarity values

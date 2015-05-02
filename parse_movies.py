@@ -3,8 +3,8 @@ from helpers import reservoir_sample, loadAsNP, buildMovieDictionary
 from file_helpers import getInfo, getMovies, getRatings
 
 TRAIN_TEST_SPLIT = 0.7
-USER_CUT = 0.4
-ITEM_CUT = 0.7
+USER_CUT = 0.5
+ITEM_CUT = 0.4
 
 
 def split_train_test_pointwise(data, len_items):
