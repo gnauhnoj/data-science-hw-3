@@ -48,8 +48,8 @@ def loadAsNP(data_generator, users, items):
 def buildMovieDictionary(movie_generator):
     movies = {}
     for movie in movie_generator:
-        (movie_id, movie_title) = movie
-        movies[movie_id] = movie_title
+        (movie_id, movie_title, genres) = movie
+        movies[movie_id] = (movie_title, genres)
     return movies
 
 
