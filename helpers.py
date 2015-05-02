@@ -31,8 +31,10 @@ def loadAsNP(data_generator, users, items):
             if matrix[user_id][movie_id]:
                 ratingNum += 1
                 ratingSum += matrix[user_id][movie_id]
-        if ratingNum > 0:
+        if ratingNum:
             matrix[0][movie_id] = ratingSum/ratingNum
+    totalNum = 0
+    totalSum = 0.0
     for user_id in xrange(1, matrix.shape[0]):
         ratingNum = 0
         ratingSum = 0.0
@@ -40,16 +42,20 @@ def loadAsNP(data_generator, users, items):
             if matrix[user_id][movie_id]:
                 ratingNum += 1
                 ratingSum += matrix[user_id][movie_id]
-        if ratingNum > 0:
+                totalNum += 1
+                totalSum += matrix[user_id][movie_id]
+        if ratingNum:
             matrix[user_id][0] = ratingSum/ratingNum
+    if totalSum:
+        matrix[0][0] = totalSum/totalNum
     return matrix
 
 
 def buildMovieDictionary(movie_generator):
     movies = {}
     for movie in movie_generator:
-        (movie_id, movie_title) = movie
-        movies[movie_id] = movie_title
+        (movie_id, movie_title, genres) = movie
+        movies[movie_id] = (movie_title, genres)
     return movies
 
 
