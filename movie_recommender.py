@@ -6,20 +6,21 @@ from math import sqrt
 
 
 class collaborative_filtering:
-    def __init__(self, data):
+    def __init__(self, data, global_average):
         """
         initialize the matrix for filtering
         TODO: get test and train data separately
         """
-        self.put_data(data)
+        self.put_data(data, global_average)
 
     def get_data(self):
         return self.data
 
 
-    def put_data(self,data):
+    def put_data(self,data,global_average):
         self.data = data
         self.n_movies = len(data[0])
+        self.global_average = global_average
         self.item_similarity = np.zeros((self.n_movies, self.n_movies), dtype=float)
         self.similarity_calculated = np.zeros(self.n_movies, dtype=float)
         return
@@ -111,6 +112,38 @@ class collaborative_filtering:
         return np.argsort(similarities),similarities
 
 
+    def mean(values):
+        avg = 0.0
+        total = 0.0
+        count = 0.0
+        for item in values:
+            if item > 0:
+                total += item
+                count += 1
+        if count <= 0:
+            return avg
+        else:
+            avg = total/count
+            return avg
+
+
+    def center_value(self,value,mean):
+        if value > 0:
+            return value - mean
+        else:
+            return 0.0
+
+
+    # def center_rating(rating,mean_rating):
+    #     fn = np.vectorize(center_value, otypes=[np.float])
+    #     return fn(rating,mean_rating)
+
+    
+    def center_rating(self,rating,mean_rating):
+        for i in range(1,len(rating)):
+            rating[i] = self.center_value(rating[i],mean_rating)
+        return rating
+
     def predict(self,user_id,movie_id):
         """
         given a user_id and a movie_id
@@ -123,6 +156,9 @@ class collaborative_filtering:
 
         # get all the ratings posted by the user
         user_rating = self.data[user_id,:]
+        # mean_user_rating = mean(user_rating)
+        mean_user_rating = user_rating[0]
+        # user_rating = self.center_rating(user_rating,mean_user_rating)
 
         prediction = 0.0
         total_sum = 0.0
@@ -133,15 +169,17 @@ class collaborative_filtering:
         for movie in similar_movies:
             # print prediction.keys()
             if user_rating[movie] != 0 and movies_similarity[movie]>0.0:
-                prediction += (movies_similarity[movie]*user_rating[movie])
+                prediction += ( movies_similarity[movie] * ( user_rating[movie] - self.get_baseline_estimate(movie,user_id) ) )
                 print prediction
                 total_sum += movies_similarity[movie]
         
         if total_sum!= 0.0:
             prediction = prediction/total_sum
 
-        return prediction
+        return self.get_baseline_estimate(movie_id,user_id) + prediction
 
+    def get_baseline_estimate(self,movie_id,user_id):
+        return self.global_average + (self.global_average - self.data[user_id][0]) + (self.global_average - self.data[0][movie_id])
 
     def recommendation(self,user_id):
         # get similarity value of all other movies(items) for the given movie
