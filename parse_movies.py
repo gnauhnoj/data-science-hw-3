@@ -52,10 +52,15 @@ def get_all_data():
     return loadAsNP(data_generator, users, items)
 
 
-if __name__ == '__main__':
-    movie_generator = getMovies()
+def loadReccFile(recFileName):
     (users, items, reviews) = getInfo()
-    movies = buildMovieDictionary(movie_generator)
-    data_generator = getRatings()
-    # train, test = split_train_test_pointwise(data_generator, reviews)
-    train, test = split_train_test_axiswise(data_generator, users, items)[0:2]
+    data_generator = getRatings(recFileName)
+    out = loadAsNP(data_generator, users, items, rebuild=True)
+    return out
+
+
+# if __name__ == '__main__':
+#     movie_generator = getMovies()
+#     (users, items, reviews) = getInfo()
+#     movies = buildMovieDictionary(movie_generator)
+#     data_generator = getRatings()
