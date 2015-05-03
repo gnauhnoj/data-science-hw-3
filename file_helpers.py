@@ -1,6 +1,7 @@
 import os
 import sys
 
+# data path for 100k dataset and delimiters
 DATA_PATH = os.path.join(os.getcwd(), 'data')
 ITEM_FILENAME_100k = os.path.join(DATA_PATH, 'ml-100k/u.item')
 DATA_FILENAME_100k = os.path.join(DATA_PATH, 'ml-100k/u.data')
@@ -8,11 +9,13 @@ INFO_FILENAME_100k = os.path.join(DATA_PATH, 'ml-100k/u.info')
 delim1_100k = '\t'
 delim2_100k = '|'
 
+#data path for 1M dataset and delimeters
 ITEM_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/movies.dat')
 DATA_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/ratings.dat')
 INFO_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/info.dat')
 delim_1M = '::'
 
+# global vars for filenames and delims - replace depending on dataset being used
 ITEM_FILENAME = ITEM_FILENAME_100k
 DATA_FILENAME = DATA_FILENAME_100k
 INFO_FILENAME = INFO_FILENAME_100k
@@ -22,6 +25,9 @@ delim2 =        delim2_100k
 genreMap = ['unknown', 'Action', 'Adventure', 'Animation', 'Childrens', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
 
 
+"""
+File parsers for rating file, info file, and movie info file
+"""
 # load as dictionary-generator
 def getRatings(data_file=None):
     try:

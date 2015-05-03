@@ -29,7 +29,7 @@ def loadAsNP(data_generator, users, items, rebuild=False):
     """
     Returns an NP array which contains all ratings as provided by the data generator
     Requires total users and total items to be passed in (in order to create the array)
-    Rebuild variable indicates whether this is being used to rebuild predicted rating table -- if so, it will also return a map
+    Rebuild variable indicates whether this is being used to rebuild predicted rating table -- if so, it will also return a map of user reviews in the format map[userid][movieid]
     """
     matrix = np.zeros((users + 1, items + 1), dtype=float)
     contribMap = {}
@@ -69,6 +69,10 @@ def loadAsNP(data_generator, users, items, rebuild=False):
 
 
 def buildMovieDictionary(movie_generator):
+    """
+    Build Movie Dictionary from Movie Generator
+    Movie Dictionary maps movie id to (title, genre list)
+    """
     movies = {}
     for movie in movie_generator:
         (movie_id, movie_title, genres) = movie
@@ -77,6 +81,10 @@ def buildMovieDictionary(movie_generator):
 
 
 def buildRatingDictionary(data_generator, movie_generator=None):
+    """
+    Build rating dictionary from data generator if movie_generator is passed it will return movie id and title as movie key
+    IF not - it returns a dictionary mapping dic[userid][movieid] = rating
+    """
     if movie_generator is not None:
         movies = buildMovieDictionary(movie_generator)
     ratings = {}
@@ -91,6 +99,14 @@ def buildRatingDictionary(data_generator, movie_generator=None):
 
 
 def getDiverseRecc(sortedRecs, movieMap, userMap, user_id):
+    """
+    Function which generates reccomendations based on a sorted list of predicted values
+    Returns top 5 non-rated movies and 5 "diverse" movies of different genres
+
+    movieMap is a dictionary mapping movieid to movietitle and genre
+    userMap is a dictionary mapping user rated movies as userMap[userid][movieid] = 0/1
+    user_id is the user recomendations are being generated for
+    """
     genreMap = {}
     out = []
     ptr = 0
