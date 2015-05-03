@@ -8,6 +8,11 @@ ITEM_CUT = 0.4
 
 
 def split_train_test_pointwise(data, len_items):
+    """
+    Randomly splits the data provided by the iterator data based on the TRAIN_TEST_SPLIT percentage
+    the percentage corresponds to the percentage of the  dataset which should be allocated to training
+    The split is performed on a per-rating level
+    """
     split_index = int(len_items * TRAIN_TEST_SPLIT)
     iterator = iter(data)
     train = [next(iterator) for _ in range(split_index)]
@@ -23,6 +28,11 @@ def split_train_test_pointwise(data, len_items):
 
 
 def split_train_test_axiswise(data, len_users, len_items):
+    """
+    Randomly splits the data provided by the iterator data based on the USER_CUT and ITEM_CUT global variables
+    these correspond to the percent of users and items which should be allocated into test dataset which should be allocated to training
+    The split is performed on the intersection between selected users/items and doesn't correspond to an exact percentage split of reviews
+    """
     remove_users = reservoir_sample(xrange(len_users), int(len_users * USER_CUT))
     remove_items = reservoir_sample(xrange(len_items), int(len_items * ITEM_CUT))
     train = []
@@ -36,6 +46,10 @@ def split_train_test_axiswise(data, len_users, len_items):
 
 
 def get_train_data(axis_sample=True):
+    """
+    Retrieve and split the dataset into test / train
+    Returns an output that is [training set as NP array, test review iterator, test user iterator, test movie iterator]
+    """
     (users, items, reviews) = getInfo()
     data_generator = getRatings()
     if axis_sample:
@@ -53,14 +67,11 @@ def get_all_data():
 
 
 def loadReccFile(recFileName):
+    """
+    Load reccomendation file and build NP array out of it
+    returns NP array for checking complete predicted ratings
+    """
     (users, items, reviews) = getInfo()
     data_generator = getRatings(recFileName)
     out = loadAsNP(data_generator, users, items, rebuild=True)
     return out
-
-
-# if __name__ == '__main__':
-#     movie_generator = getMovies()
-#     (users, items, reviews) = getInfo()
-#     movies = buildMovieDictionary(movie_generator)
-#     data_generator = getRatings()

@@ -3,6 +3,9 @@ import numpy as np
 
 
 def reservoir_sample(iterator, k):
+    """
+    Basic reservoir sample. Takes a target sample amount
+    """
     # fill the reservoir to start
     iterator = iter(iterator)
     result = [next(iterator) for _ in range(k)]
@@ -16,10 +19,18 @@ def reservoir_sample(iterator, k):
 
 
 def get_rating(matrix, user_id, item_id):
+    """
+    Retrieve a rating for a user given a rating matrix, userid, and itemid
+    """
     return matrix[user_id][item_id]
 
 
 def loadAsNP(data_generator, users, items, rebuild=False):
+    """
+    Returns an NP array which contains all ratings as provided by the data generator
+    Requires total users and total items to be passed in (in order to create the array)
+    Rebuild variable indicates whether this is being used to rebuild predicted rating table -- if so, it will also return a map
+    """
     matrix = np.zeros((users + 1, items + 1), dtype=float)
     contribMap = {}
     for review in data_generator:
