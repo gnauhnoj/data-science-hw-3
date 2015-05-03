@@ -1,21 +1,10 @@
 from movie_recommender import collaborative_filtering
-from parse_movies import get_train_data
+from parse_movies import get_train_data, get_all_data
 
-if __name__ == '__main__':
-	# TODO: move get data to cf itself
+def train_and_test():
 	train_data, test_data, test_users, test_movies = get_train_data()
 	print "loaded data"
-	total = 0.0
-	count = 0.0
-	for movie_id in range(1, train_data.shape[1]):
-		for user_id in range(1, train_data.shape[0]):
-			if train_data[user_id][movie_id]:
-				total += train_data[user_id][movie_id]
-				count += 1
-	
-	avg = (total/float(count)) if (count != 0) else 0.0
-	print avg
-	cf = collaborative_filtering(train_data,avg)
+	cf = collaborative_filtering(train_data)
 	# cf.precompute_item_similarity()
 	print cf.predict(1,3)
 	print "Evaluating"
@@ -23,3 +12,20 @@ if __name__ == '__main__':
 	# print cf.predict(1,3)
 	# cf.train()
 	# get test data
+
+
+def write_reco(reco,user_id):
+    recommendation_file = open('recommendation', 'a')
+    recommendation_file.write( str(user_id) + '\t' + '\t'.join(map(str, reco)) + '\n')
+    recommendation_file.flush()
+    recommendation_file.close()
+
+if __name__ == '__main__':
+	# TODO: move get data to cf itself
+	data = get_all_data()
+	print "loaded data"
+	cf = collaborative_filtering(data)
+	print "initialized filter"
+	for user_id in range(1,len(data)):
+		recommendation = cf.recommendation(user_id)
+		write_reco(recommendation,user_id)

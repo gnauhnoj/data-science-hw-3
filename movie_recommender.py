@@ -6,21 +6,21 @@ from math import sqrt
 
 
 class collaborative_filtering:
-    def __init__(self, data, global_average):
+    def __init__(self, data):
         """
         initialize the matrix for filtering
         TODO: get test and train data separately
         """
-        self.put_data(data, global_average)
+        self.put_data(data)
 
     def get_data(self):
         return self.data
 
 
-    def put_data(self,data,global_average):
+    def put_data(self,data):
         self.data = data
         self.n_movies = len(data[0])
-        self.global_average = global_average
+        self.global_average = data[0][0]
         self.item_similarity = np.zeros((self.n_movies, self.n_movies), dtype=float)
         self.similarity_calculated = np.zeros(self.n_movies, dtype=float)
         return
@@ -105,7 +105,7 @@ class collaborative_filtering:
                         print e
                         print item_1, item_2
         else:
-            print "repeated"
+            # print "repeated"
             similarities = self.item_similarity[item_1]
         # print similarities
         self.similarity_calculated[item_1] = 1
@@ -165,47 +165,52 @@ class collaborative_filtering:
 
         # do a weighted sum of users existing reviews
         # weights are based on the similarity values
-        # if (total_sum != 0.0):
         for movie in similar_movies:
             # print prediction.keys()
             if user_rating[movie] != 0 and movies_similarity[movie]>0.0:
                 prediction += ( movies_similarity[movie] * ( user_rating[movie] - self.get_baseline_estimate(movie,user_id) ) )
-                print prediction
                 total_sum += movies_similarity[movie]
         
         if total_sum!= 0.0:
             prediction = prediction/total_sum
 
-        return self.get_baseline_estimate(movie_id,user_id) + prediction
+        prediction_rating = self.get_baseline_estimate(movie_id,user_id) + prediction
+        return prediction_rating if prediction_rating<=5.0 else 5.0
 
     def get_baseline_estimate(self,movie_id,user_id):
         return self.global_average + (self.global_average - self.data[user_id][0]) + (self.global_average - self.data[0][movie_id])
 
     def recommendation(self,user_id):
-        # get similarity value of all other movies(items) for the given movie
-        # TODO: change it to top k if needed
-        similar_movies, movies_similarity = self.get_similar_movies(movie_id)
-
-        # get all the ratings posted by the user
         user_rating = self.data[user_id,:]
-
         prediction = {}
-        total_sum = sum(movies_similarity) 
-        # do a weighted sum of users existing reviews
-        # weights are based on the similarity values
-        for movie in similar_movies:
-            # print prediction.keys()
-            if user_rating[movie] != 0:
-                if movie in prediction.keys():
-                    prediction[movie] += (movies_similarity[movie]*user_rating[movie])/total_sum
-                else:
-                    prediction[movie] = (movies_similarity[movie]*user_rating[movie])/total_sum 
+        is_predicted = {}
+        # get ratings for the movies user has not rated till now
+        for i in range(1,len(user_rating)):
+            if user_rating[i] == 0:
+                prediction[i] = self.predict(user_id,i)
+                is_predicted[i] = 1
+                print "rating predicted for movie " + str(i) + " for user " + str(user_id) + ":" + str( prediction[i] )
+            else:
+                prediction[i] = user_rating[i]
+                is_predicted[i] = 0
+                # print "rating for movie " + str(i) + " for user " + str(user_id) + ":" + str( prediction[i] )
 
-        # sort prediction by rating value
-        # sorted_prediction = sorted(prediction.items(), key=operator.itemgetter(1), reverse=True)
+        # write all the ratings for the user to file
+        print "writing reviews"
+        self.write_rating(prediction, user_id, is_predicted)
+
+        # sort them by rating and return the indexes
         sorted_prediction = map(itemgetter(0), sorted(prediction.items(), key=itemgetter(1), reverse=True))[:5]
-        #return top 5
+        # return top 5
         return sorted_prediction
+
+
+    def write_rating(self,prediction,user_id,is_predicted):
+        rating_file = open('ratings', 'a')
+        for movie_id in prediction.keys():
+            rating_file.write( '\t'.join([str(user_id), str(movie_id), str(prediction[movie_id]), str(is_predicted[movie_id]) ]) + '\n')
+        rating_file.flush()
+        rating_file.close()
 
 
     def score(self, test_data):

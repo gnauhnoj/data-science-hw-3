@@ -46,6 +46,12 @@ def get_train_data(axis_sample=True):
     return out
 
 
+def get_all_data():
+    (users, items, reviews) = getInfo()
+    data_generator = getRatings()
+    return loadAsNP(data_generator, users, items)
+
+
 if __name__ == '__main__':
     movie_generator = getMovies()
     (users, items, reviews) = getInfo()
