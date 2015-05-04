@@ -11,7 +11,7 @@
 Running the recommedation takes time so we precomputed the missing ratings in the dataset using collaborative filtering method and stored the results in a 'ratings' file.
 
 Follow these steps to get recommendations for a set of users:
-- Download the file from [here](https://github.com/gnauhnoj/data-science-hw-3/blob/master/ratings) and put it inside the folder with rest of the files.
+- Download the 'ratings' file from [here](https://github.com/gnauhnoj/data-science-hw-3/blob/master/ratings) and put it inside the folder with rest of the files.
 - Open the file ml_recommender.py.
 - You can specify the users for which you want recommendations by adding them to the 'users_to_recommend' list.
 - Uncomment the line in main that calls get_recommendations function. 
