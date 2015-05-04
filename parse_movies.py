@@ -71,7 +71,13 @@ def loadReccFile(recFileName):
     Load reccomendation file and build NP array out of it
     returns NP array for checking complete predicted ratings
     """
+    rec_file_bool = False
     (users, items, reviews) = getInfo()
-    data_generator = getRatings(recFileName)
+    try:
+        f = open(recFileName, 'r')
+    except:
+        f = open(recFileName, 'w')
+        rec_file_bool = True
+    data_generator = getRatings(recFileName, rec_file=rec_file_bool)
     out = loadAsNP(data_generator, users, items, rebuild=True)
     return out

@@ -36,7 +36,7 @@ def loadAsNP(data_generator, users, items, rebuild=False):
     for review in data_generator:
         (user_id, movie_id, rating, ts) = review
         matrix[user_id][movie_id] = rating
-        if ts and rebuild:
+        if not ts and rebuild:
             contribMap.setdefault(user_id, {})
             contribMap[user_id][movie_id] = 1
     for movie_id in xrange(1, matrix.shape[1]):

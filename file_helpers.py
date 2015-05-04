@@ -9,7 +9,7 @@ INFO_FILENAME_100k = os.path.join(DATA_PATH, 'ml-100k/u.info')
 delim1_100k = '\t'
 delim2_100k = '|'
 
-#data path for 1M dataset and delimeters
+# data path for 1M dataset and delimeters
 ITEM_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/movies.dat')
 DATA_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/ratings.dat')
 INFO_FILENAME_1M = os.path.join(DATA_PATH, 'ml-1m/info.dat')
@@ -25,17 +25,21 @@ delim2 =        delim2_100k
 genreMap = ['unknown', 'Action', 'Adventure', 'Animation', 'Childrens', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
 
 
-"""
-File parsers for rating file, info file, and movie info file
-"""
-# load as dictionary-generator
-def getRatings(data_file=None):
+def getRatings(data_file=None, rec_file=False):
+    """
+    File parsers for rating file, info file, and movie info file
+    """
+    if rec_file:
+        f2 = open(data_file, 'a')
+        data_file = None
     try:
         f = open(data_file, 'r')
     except TypeError:
         f = open(DATA_FILENAME, 'r')
     for l in f:
         (user_id, movie_id, rating, ts) = l.strip().split(delim1)
+        if rec_file and f2:
+            f2.write('\t'.join([user_id, movie_id, rating, "0"]) + '\n')
         user_id = int(user_id)
         movie_id = int(movie_id)
         rating = float(rating)
