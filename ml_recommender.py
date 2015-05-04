@@ -11,9 +11,9 @@ def train_and_test():
 	train_data, test_data, test_users, test_movies = get_train_data()
 	print "loaded train & test data"
 	cf = collaborative_filtering(train_data)
-	# evaluate the collaborative filtering model by printing the rmse value for the test data 
+	# evaluate the collaborative filtering model by printing the rmse value for the test data
 	print cf.score(test_data)
-	
+
 
 def write_reco(reco,user_id):
     recommendation_file = open('recommendation', 'a')
@@ -35,8 +35,9 @@ def get_recommendations(users_to_recommend):
 	for user_id in users_to_recommend:
 		recommendation = cf.recommendation(user_id)
 		print "Recommendations for user : " + str(user_id)
-		print recommendation[0]	
+		print [recc[0] for recc in recommendation]
 
 if __name__ == '__main__':
-	users_to_recommend = [8,90,10]	
+	# users must be < 944
+	users_to_recommend = [8, 900, 1, 35, 40]
 	get_recommendations(users_to_recommend)

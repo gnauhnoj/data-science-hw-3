@@ -34,11 +34,11 @@ class collaborative_filtering:
         """
         Precompute item similarity matrix
         """
-        
+
         l = len(self.data[0])
         # total number of items
         all_items = range(1,l)
-        
+
         # print all_items
         for item_1 in all_items:
             print item_1
@@ -87,7 +87,7 @@ class collaborative_filtering:
         """
         item_similarity = self.item_similarity[movie_id,:]
         return np.argsort(item_similarity),item_similarity
-    
+
     def get_similar_movies(self, item_1):
         """
         Find similar movies given a movie id
@@ -142,7 +142,7 @@ class collaborative_filtering:
     #     fn = np.vectorize(center_value, otypes=[np.float])
     #     return fn(rating,mean_rating)
 
-    
+
     def center_rating(self,rating,mean_rating):
         for i in range(1,len(rating)):
             rating[i] = self.center_value(rating[i],mean_rating)
@@ -152,7 +152,7 @@ class collaborative_filtering:
         """
         given a user_id and a movie_id
         predict the rating for the user
-        Assuming item-item 
+        Assuming item-item
         """
         # get similarity value of all other movies(items) for the given movie
         # TODO: change it to top k if needed
@@ -174,7 +174,7 @@ class collaborative_filtering:
             if user_rating[movie] != 0 and movies_similarity[movie]>0.0:
                 prediction += ( movies_similarity[movie] * ( user_rating[movie] - self.get_baseline_estimate(movie,user_id) ) )
                 total_sum += movies_similarity[movie]
-        
+
         if total_sum!= 0.0:
             prediction = prediction/total_sum
 
@@ -200,7 +200,7 @@ class collaborative_filtering:
                 else:
                     prediction[i] = precomp_user_movie_rating;
                     is_predicted[i] = 1
-                print "rating predicted for movie " + str(i) + " for user " + str(user_id) + ":" + str( prediction[i] )
+                # print "rating predicted for movie " + str(i) + " for user " + str(user_id) + ":" + str( prediction[i] )
             else:
                 prediction[i] = user_rating[i]
                 is_predicted[i] = 0
@@ -211,9 +211,9 @@ class collaborative_filtering:
             # self.write_rating(prediction, user_id, is_predicted)
 
         # sort them by rating and return the indexes
-        sorted_prediction = map(itemgetter(0), sorted(prediction.items(), key=itemgetter(1), reverse=True))[:50]
+        sorted_prediction = map(itemgetter(0), sorted(prediction.items(), key=itemgetter(1), reverse=True))[:300]
 
-        final_prediction = getDiverseRecc(sorted_prediction ,self.movie_map, self.user_map, user_id)        
+        final_prediction = getDiverseRecc(sorted_prediction ,self.movie_map, self.user_map, user_id)
 
         return final_prediction
 

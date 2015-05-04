@@ -36,7 +36,7 @@ def loadAsNP(data_generator, users, items, rebuild=False):
     for review in data_generator:
         (user_id, movie_id, rating, ts) = review
         matrix[user_id][movie_id] = rating
-        if not ts and rebuild:
+        if ts == 0 and rebuild:
             contribMap.setdefault(user_id, {})
             contribMap[user_id][movie_id] = 1
     for movie_id in xrange(1, matrix.shape[1]):
@@ -111,31 +111,28 @@ def getDiverseRecc(sortedRecs, movieMap, userMap, user_id):
     out = []
     ptr = 0
     maxVal = 1
+    count = 0
     while len(out) < 10:
         movie_id = sortedRecs[ptr]
         movie = movieMap[movie_id]
-        # print movie
         try:
             userMap[user_id][movie_id]
+            count += 1
         except KeyError:
-            # print 'Except'
             for genre in movie[1]:
                 genreMap.setdefault(genre, 0)
-                if genreMap[genre] < maxVal:
-                    if movie not in out:
-                        out.append(movie)
-                    genreMap[genre] += 1
+                if genreMap[genre] < maxVal and movie not in out:
+                    out.append(movie)
+                    for genre2 in movie[1]:
+                        genreMap.setdefault(genre2, 0)
+                        genreMap[genre2] += 1
+                    break
         if ptr == len(sortedRecs)-1:
+            if (len(out) + count) == len(sortedRecs):
+                break
             ptr = 0
             maxVal += 1
+            count = 0
             continue
         ptr += 1
-    count = 0
-    for thing in sortedRecs:
-        if count < 10:
-            try:
-                userMap[user_id][thing]
-            except KeyError:
-                print movieMap[thing]
-                count+=1
     return out
