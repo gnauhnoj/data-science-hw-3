@@ -38,5 +38,6 @@ def get_recommendations(users_to_recommend):
 		print recommendation[0]	
 
 if __name__ == '__main__':
-	users_to_recommend = [8,90,10]	
-	get_recommendations(users_to_recommend)
+	users_to_recommend = [8,90,10]
+	# train_and_test()	
+	# get_recommendations(users_to_recommend)
