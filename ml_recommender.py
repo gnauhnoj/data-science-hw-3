@@ -1,18 +1,19 @@
 from movie_recommender import collaborative_filtering
 from parse_movies import get_train_data, get_all_data
+from parse_movies import loadReccFile
+
 
 def train_and_test():
+	"""
+	Loads the training for the movie_recommender
+	Prints the RMSE value for the test data
+	"""
 	train_data, test_data, test_users, test_movies = get_train_data()
-	print "loaded data"
+	print "loaded train & test data"
 	cf = collaborative_filtering(train_data)
-	# cf.precompute_item_similarity()
-	print cf.predict(1,3)
-	print "Evaluating"
+	# evaluate the collaborative filtering model by printing the rmse value for the test data 
 	print cf.score(test_data)
-	# print cf.predict(1,3)
-	# cf.train()
-	# get test data
-
+	
 
 def write_reco(reco,user_id):
     recommendation_file = open('recommendation', 'a')
@@ -20,12 +21,22 @@ def write_reco(reco,user_id):
     recommendation_file.flush()
     recommendation_file.close()
 
-if __name__ == '__main__':
-	# TODO: move get data to cf itself
+
+def get_recommendations(users_to_recommend):
+	"""
+	Print the recommendations for given set of users
+	"""
 	data = get_all_data()
 	print "loaded data"
-	cf = collaborative_filtering(data)
-	print "initialized filter"
-	for user_id in range(1,len(data)):
+	precomputed_predictions = loadReccFile('ratings')
+	print "loaded precomputed predictions"
+	cf = collaborative_filtering(data, precomputed_predictions)
+	print "initialized collaborative filter model"
+	for user_id in users_to_recommend:
 		recommendation = cf.recommendation(user_id)
-		write_reco(recommendation,user_id)
+		print "Recommendations for user : " + str(user_id)
+		print recommendation[0]	
+
+if __name__ == '__main__':
+	users_to_recommend = [8,90,10]	
+	get_recommendations(users_to_recommend)

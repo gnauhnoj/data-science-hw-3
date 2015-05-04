@@ -112,18 +112,30 @@ def getDiverseRecc(sortedRecs, movieMap, userMap, user_id):
     ptr = 0
     maxVal = 1
     while len(out) < 10:
-        movie_id = sortedRecs[ptr][1]
+        movie_id = sortedRecs[ptr]
         movie = movieMap[movie_id]
+        # print movie
         try:
             userMap[user_id][movie_id]
         except KeyError:
+            # print 'Except'
             for genre in movie[1]:
                 genreMap.setdefault(genre, 0)
-                if genreMap[genre] < maxVal and movie not in out:
+                if genreMap[genre] < maxVal:
+                    if movie not in out:
                         out.append(movie)
-                        genreMap[genre] += 1
+                    genreMap[genre] += 1
         if ptr == len(sortedRecs)-1:
             ptr = 0
             maxVal += 1
             continue
         ptr += 1
+    count = 0
+    for thing in sortedRecs:
+        if count < 10:
+            try:
+                userMap[user_id][thing]
+            except KeyError:
+                print movieMap[thing]
+                count+=1
+    return out
