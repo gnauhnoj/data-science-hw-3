@@ -1,24 +1,26 @@
 # data-science-hw-3
 
-Adding the dataset:
+## Adding the dataset:
 
-- Download the 100k reviews data set from http://files.grouplens.org/datasets/movielens/ml-100k.ziphttp://files.grouplens.org/datasets/movielens/ml-100k.zip.
-- Create a data folder and unzip the downoladed folder inside it.
+- Download the 100k reviews data file from [here](http://files.grouplens.org/datasets/movielens/ml-100k.ziphttp://files.grouplens.org/datasets/movielens/ml-100k.zip)
+- Unzip the downloaded file inside of a subdirectory of root "data/".
 
 
-Recommendation System:
+## Recommendation System:
 
-Running the recommedation takes time so we precomputed the missing ratings in the dataset using collaborative filtering method and stored the results in a 'ratings' file.
+Running the recommedation takes a long time so we precomputed the missing (predicted) ratings in the dataset using the collaborative filtering method discussed in our writeup and stored the results in a 'ratings' file.
 
-Follow the steps to get recommendations for a set of users
-1. Download the file from here: and put it inside the folder.
-2. Open the file ml_recommender.py.
-3. You can specify the users for which you want recommendations by adding them to the 'users_to_recommend' list.
-4. Uncomment the line in main that calls get_recommendations function. 
-The result is the recommendation for each user.
+Follow these steps to get recommendations given a set of users:
+- Download the 'ratings' file from [here](https://github.com/gnauhnoj/data-science-hw-3/blob/master/ratings) and put it inside the folder with rest of the files.
+- Open the file ml_recommender.py.
+- You can specify the users for which you want recommendations by adding them to the 'users_to_recommend' list on line 42
+- Uncomment the line in main that calls get_recommendations function on line 44
+The result is the 10 (or less depending on the number of reviews the user has already made) recommendations for each user which are printed in the console.
 
-NOTE: The solution works regardless of the presence of the ratings file, but the presence of the file enables the system to give results instantaneously.
+**NOTE**: The solution works regardless of the presence of the ratings file, but the presence of the file enables the system to give results instantaneously.
 
-Follow the steps to do a training and testing on the dataset
-1. Open the file ml_recommender.py.
-2. Uncomment the line in main that calls train_and_test function. It takes a while to run and in the end prints the RMSE value for the test datset.
+## Train and test
+
+Follow these steps to do a training and testing on the dataset:
+- Open the file ml_recommender.py.
+- Uncomment the line in main that calls train_and_test function. It takes a while to run and in the end prints the RMSE value for the test datset on line 43.
