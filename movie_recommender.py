@@ -196,7 +196,7 @@ class collaborative_filtering:
                     prediction[i] = self.predict(user_id,i)
                     is_predicted[i] = 1
                     self.predictions[user_id][i] = prediction[i]
-                    write_single_rating(i, user_id, prediction[i])
+                    self.write_single_rating(i, user_id, prediction[i])
                 else:
                     prediction[i] = precomp_user_movie_rating;
                     is_predicted[i] = 1
