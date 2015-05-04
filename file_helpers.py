@@ -27,7 +27,8 @@ genreMap = ['unknown', 'Action', 'Adventure', 'Animation', 'Childrens', 'Comedy'
 
 def getRatings(data_file=None, rec_file=False):
     """
-    File parsers for rating file, info file, and movie info file
+    File parsers for rating file
+    If rec_file boolean is passed, it creates a rec file by copying the DATA_FILENAME data
     """
     if rec_file:
         f2 = open(data_file, 'a')
@@ -49,6 +50,9 @@ def getRatings(data_file=None, rec_file=False):
 
 
 def getInfo(info_file=None):
+    """
+    File parsers for info file
+    """
     stats = []
     try:
         f = open(info_file, 'r')
@@ -62,6 +66,9 @@ def getInfo(info_file=None):
 
 
 def getMovies(item_file=None):
+    """
+    File parsers for movie file
+    """
     try:
         f = open(item_file, 'r')
     except TypeError:
