@@ -3,26 +3,30 @@ from scipy.stats.stats import pearsonr
 from operator import itemgetter
 from sklearn.metrics import mean_squared_error
 from math import sqrt
-
+from helpers import buildMovieDictionary, getDiverseRecc
+from file_helpers import getMovies
 
 class collaborative_filtering:
-    def __init__(self, data):
+    def __init__(self, data, predictions):
         """
         initialize the matrix for filtering
         TODO: get test and train data separately
         """
-        self.put_data(data)
+        self.put_data(data, predictions)
 
     def get_data(self):
         return self.data
 
 
-    def put_data(self,data):
+    def put_data(self,data, predictions):
         self.data = data
         self.n_movies = len(data[0])
         self.global_average = data[0][0]
         self.item_similarity = np.zeros((self.n_movies, self.n_movies), dtype=float)
         self.similarity_calculated = np.zeros(self.n_movies, dtype=float)
+        self.predictions = predictions[0]
+        self.user_map = predictions[1]
+        self.movie_map = buildMovieDictionary(getMovies())
         return
 
 
@@ -187,31 +191,51 @@ class collaborative_filtering:
         # get ratings for the movies user has not rated till now
         for i in range(1,len(user_rating)):
             if user_rating[i] == 0:
-                prediction[i] = self.predict(user_id,i)
-                is_predicted[i] = 1
+                precomp_user_movie_rating = self.predictions[user_id][i]
+                if precomp_user_movie_rating == 0:
+                    prediction[i] = self.predict(user_id,i)
+                    is_predicted[i] = 1
+                    self.predictions[user_id][i] = prediction[i]
+                    write_single_rating(i, user_id, prediction[i])
+                else:
+                    prediction[i] = precomp_user_movie_rating;
+                    is_predicted[i] = 1
                 print "rating predicted for movie " + str(i) + " for user " + str(user_id) + ":" + str( prediction[i] )
             else:
                 prediction[i] = user_rating[i]
                 is_predicted[i] = 0
-                # print "rating for movie " + str(i) + " for user " + str(user_id) + ":" + str( prediction[i] )
+            # print "rating for movie " + str(i) + " for user " + str(user_id) + ":" + str( prediction[i] )
 
-        # write all the ratings for the user to file
-        print "writing reviews"
-        self.write_rating(prediction, user_id, is_predicted)
+            # write all the ratings for the user to file
+            # print "writing reviews"
+            # self.write_rating(prediction, user_id, is_predicted)
 
         # sort them by rating and return the indexes
-        sorted_prediction = map(itemgetter(0), sorted(prediction.items(), key=itemgetter(1), reverse=True))[:5]
-        # return top 5
-        return sorted_prediction
+        sorted_prediction = map(itemgetter(0), sorted(prediction.items(), key=itemgetter(1), reverse=True))[:50]
+
+        final_prediction = getDiverseRecc(sorted_prediction ,self.movie_map, self.user_map, user_id)        
+
+        return final_prediction
 
 
-    def write_rating(self,prediction,user_id,is_predicted):
+    def write_rating(self, prediction, user_id, is_predicted):
         rating_file = open('ratings', 'a')
         for movie_id in prediction.keys():
             rating_file.write( '\t'.join([str(user_id), str(movie_id), str(prediction[movie_id]), str(is_predicted[movie_id]) ]) + '\n')
         rating_file.flush()
         rating_file.close()
 
+
+    def write_single_rating(self, movie_id, user_id, rating):
+        """
+        Write the predicted rating to the ratings file in the tab seprated format
+        user_id movie_id rating 1
+        1 indicates the the rating was predicted
+        """
+        rating_file = open('ratings', 'a')
+        rating_file.write( '\t'.join([str(user_id), str(movie_id), str(rating), str(1) ]) + '\n')
+        rating_file.flush()
+        rating_file.close()
 
     def score(self, test_data):
         """
