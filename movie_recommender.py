@@ -11,8 +11,10 @@ warnings.filterwarnings("ignore")
 class collaborative_filtering:
     def __init__(self, data, predictions = [0,0]):
         """
-        initialize the matrix for filtering
-        TODO: get test and train data separately
+        Initialize the class instance with required data to build the model
+        Receives 2D numpy array containing data about the ratings by each user for each movie id
+        Rating is zero if the user has not rated the movie till now
+        predictions is a tuple containing the precomputed data for recommendations and the user map
         """
         self.put_data(data, predictions)
 
@@ -32,44 +34,11 @@ class collaborative_filtering:
         return
 
 
-    def precompute_item_similarity(self):
-        """
-        Precompute item similarity matrix
-        """
-
-        l = len(self.data[0])
-        # total number of items
-        all_items = range(1,l)
-
-        # print all_items
-        for item_1 in all_items:
-            print item_1
-            movie_1 = self.data[:,item_1]
-            for item_2 in all_items:
-                movie_2 = self.data[:,item_2]
-                if( (item_1 == item_2) or  movie_1[0] == 0.0 or  movie_2[0] == 0.0 ):
-                    self.item_similarity[item_1][item_2] = 0
-                elif (item_1 < item_2):
-                    try:
-                        similarity_value = self.similarity(movie_1,movie_2)
-                        self.item_similarity[item_1][item_2] = similarity_value
-                        self.item_similarity[item_2][item_1] = similarity_value
-                        # break
-                    except Exception as e:
-                        print e
-                        print item_1, item_2
-                        # print self.data[:,item_1]
-                        # print self.data[:,item_2]
-                        # break
-            # break
-        print "precomputed item similarity"
-        return
-
-
     def similarity(self, item_1, item_2):
         """
-        Method to compute similarity between 2 items
-        Assuming pearson for now
+        Method to compute similarity between 2 movie vectors
+        Receives the rating vectors for 2 movies
+        Returns the pearson similarity coefficient by considering only co-rated items
         """
         new_1 = []
         new_2 = []
@@ -82,13 +51,6 @@ class collaborative_filtering:
         similarity_value = pearsonr(new_1,new_2)[0]
         return similarity_value
 
-
-    def get_similar_movies_precomp(self, movie_id):
-        """
-        Find similar movies given a movie id using precomputed data
-        """
-        item_similarity = self.item_similarity[movie_id,:]
-        return np.argsort(item_similarity),item_similarity
 
     def get_similar_movies(self, item_1):
         """
@@ -105,63 +67,27 @@ class collaborative_filtering:
                     try:
                         similarities[item_2] = self.similarity(movie_1,movie_2)
                         self.item_similarity[item_1][item_2] = similarities[item_2]
-                        # print similarities[item_2]
-                        # break
                     except Exception as e:
                         print e
                         print item_1, item_2
         else:
-            # print "repeated"
             similarities = self.item_similarity[item_1]
-        # print similarities
         self.similarity_calculated[item_1] = 1
         return np.argsort(similarities),similarities
 
 
-    def mean(values):
-        avg = 0.0
-        total = 0.0
-        count = 0.0
-        for item in values:
-            if item > 0:
-                total += item
-                count += 1
-        if count <= 0:
-            return avg
-        else:
-            avg = total/count
-            return avg
-
-
-    def center_value(self,value,mean):
-        if value > 0:
-            return value - mean
-        else:
-            return 0.0
-
-
-    # def center_rating(rating,mean_rating):
-    #     fn = np.vectorize(center_value, otypes=[np.float])
-    #     return fn(rating,mean_rating)
-
-
-    def center_rating(self,rating,mean_rating):
-        for i in range(1,len(rating)):
-            rating[i] = self.center_value(rating[i],mean_rating)
-        return rating
-
     def predict(self,user_id,movie_id):
         """
-        given a user_id and a movie_id
-        predict the rating for the user
-        Assuming item-item
+        Receives a user_id and a movie_id
+        Returns the rating the user will give to the movie using combination of
+        item based collaborative filtering and global baseline approach
         """
         # get similarity value of all other movies(items) for the given movie
-        # TODO: change it to top k if needed
         similar_movies, movies_similarity = self.get_similar_movies(movie_id)
 
         # get all the ratings posted by the user
         user_rating = self.data[user_id,:]
+ 
         # mean_user_rating = mean(user_rating)
         mean_user_rating = user_rating[0]
         # user_rating = self.center_rating(user_rating,mean_user_rating)
@@ -169,10 +95,9 @@ class collaborative_filtering:
         prediction = 0.0
         total_sum = 0.0
 
-        # do a weighted sum of users existing reviews
+        # do a weighted sum of users existing reviews after adjusting for baseline
         # weights are based on the similarity values
         for movie in similar_movies:
-            # print prediction.keys()
             if user_rating[movie] != 0 and movies_similarity[movie]>0.0:
                 prediction += ( movies_similarity[movie] * ( user_rating[movie] - self.get_baseline_estimate(movie,user_id) ) )
                 total_sum += movies_similarity[movie]
@@ -180,13 +105,23 @@ class collaborative_filtering:
         if total_sum!= 0.0:
             prediction = prediction/total_sum
 
+        # add global baseline value for the movie
+        # particularly useful in the case when item-user matrix is sparse and there are few or no reviews for similar movies
         prediction_rating = self.get_baseline_estimate(movie_id,user_id) + prediction
         return prediction_rating if prediction_rating<=5.0 else 5.0
 
     def get_baseline_estimate(self,movie_id,user_id):
+        """
+        Receives a user_id and a movie_id
+        Returns baseline rating value for the pair
+        """
         return self.global_average + (self.global_average - self.data[user_id][0]) + (self.global_average - self.data[0][movie_id])
 
     def recommendation(self,user_id):
+        """
+        Receives a user_id
+        Returns recommendation list of 10 movies for the user
+        """
         user_rating = self.data[user_id,:]
         prediction = {}
         is_predicted = {}
@@ -221,6 +156,10 @@ class collaborative_filtering:
 
 
     def write_rating(self, prediction, user_id, is_predicted):
+        """
+        Receives a user id, all the ratings for the user, and the information if the rating was predicted or already in the dataset
+        Writes the ratings for the user to the 'ratings' file
+        """
         rating_file = open('ratings', 'a')
         for movie_id in prediction.keys():
             rating_file.write( '\t'.join([str(user_id), str(movie_id), str(prediction[movie_id]), str(is_predicted[movie_id]) ]) + '\n')
@@ -241,7 +180,9 @@ class collaborative_filtering:
 
     def score(self, test_data):
         """
-        Returns the rmse value for the test data
+        Receives test data that is a list of user_id and movie_id tuples
+        Returns the rmse value for the test data set after predicting the
+        values for each and comparing it to the ground truth
         """
         predictions = []
         truth = []
@@ -253,3 +194,75 @@ class collaborative_filtering:
 
         rmse = sqrt(mean_squared_error(truth,predictions))
         return rmse
+
+    def mean(values):
+        """
+        Returns the mean of non zero entries of a list
+        """
+        avg = 0.0
+        total = 0.0
+        count = 0.0
+        for item in values:
+            if item > 0:
+                total += item
+                count += 1
+        if count <= 0:
+            return avg
+        else:
+            avg = total/count
+            return avg
+
+
+    def center_value(self,value,mean):
+        if value > 0:
+            return value - mean
+        else:
+            return 0.0
+
+
+    def center_rating(self,rating,mean_rating):
+        """
+        Method to center a users rating based on his/her other ratings
+        """
+        for i in range(1,len(rating)):
+            rating[i] = self.center_value(rating[i],mean_rating)
+        return rating
+
+
+    def precompute_item_similarity(self):
+        """
+        Precompute item similarity matrix
+        """
+        l = len(self.data[0])
+        # total number of items
+        all_items = range(1,l)
+
+        # print all_items
+        for item_1 in all_items:
+            print item_1
+            movie_1 = self.data[:,item_1]
+            for item_2 in all_items:
+                movie_2 = self.data[:,item_2]
+                if( (item_1 == item_2) or  movie_1[0] == 0.0 or  movie_2[0] == 0.0 ):
+                    self.item_similarity[item_1][item_2] = 0
+                elif (item_1 < item_2):
+                    try:
+                        similarity_value = self.similarity(movie_1,movie_2)
+                        self.item_similarity[item_1][item_2] = similarity_value
+                        self.item_similarity[item_2][item_1] = similarity_value
+                        # break
+                    except Exception as e:
+                        print e
+                        print item_1, item_2
+        print "precomputed item similarity"
+        return
+
+
+
+    def get_similar_movies_precomp(self, movie_id):
+        """
+        Find similar movies given a movie id using precomputed data
+        """
+        item_similarity = self.item_similarity[movie_id,:]
+        return np.argsort(item_similarity),item_similarity
+
