@@ -41,4 +41,4 @@ if __name__ == '__main__':
 	# users must be < 944
 	users_to_recommend = [8, 900, 1, 35, 40]
 	# train_and_test()
-	# get_recommendations(users_to_recommend)
+	get_recommendations(users_to_recommend)

@@ -1,4 +1,4 @@
-# data-science-hw-3
+# Data-Science-hw-3
 
 ## Adding the dataset:
 

@@ -5,9 +5,11 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 from helpers import buildMovieDictionary, getDiverseRecc
 from file_helpers import getMovies
+import warnings
+warnings.filterwarnings("ignore")
 
 class collaborative_filtering:
-    def __init__(self, data, predictions):
+    def __init__(self, data, predictions = [0,0]):
         """
         initialize the matrix for filtering
         TODO: get test and train data separately
@@ -249,5 +251,5 @@ class collaborative_filtering:
             predictions += [prediction]
             truth += [sample[2]]
 
-        rms = sqrt(mean_squared_error(truth,predictions))
-        return rms
+        rmse = sqrt(mean_squared_error(truth,predictions))
+        return rmse
