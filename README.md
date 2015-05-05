@@ -17,6 +17,9 @@ Follow these steps to get recommendations given a set of users:
 - Uncomment the line in main that calls get_recommendations function on line 44
 The result is the 10 (or less depending on the number of reviews the user has already made) recommendations for each user which are printed in the console.
 
+Sample Output:
+![alt tag](https://github.com/gnauhnoj/data-science-hw-3/blob/master/ouput.png)
+
 **NOTE**: The solution works regardless of the presence of the ratings file, but the presence of the file enables the system to give results instantaneously.
 
 ## Train and test
